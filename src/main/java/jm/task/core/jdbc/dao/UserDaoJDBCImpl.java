@@ -3,10 +3,9 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.persistence.metamodel.StaticMetamodel;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
@@ -46,7 +45,6 @@ public class UserDaoJDBCImpl implements UserDao {
         try {
             PreparedStatement preparedStatement =
                     connection.prepareStatement("INSERT INTO USER VALUES(default, ?,?,?) ");
-           // preparedStatement.setLong(1, 1);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
@@ -58,14 +56,42 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM USER WHERE id=?");
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
 
     }
 
     public List<User> getAllUsers() {
-        return null;
+        List<User> userList = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM USER");
+            while(resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getLong("id"));
+                user.setName(resultSet.getString("name"));
+                user.setLastName(resultSet.getString("last_name"));
+                user.setAge(resultSet.getByte("age"));
+
+                userList.add(user);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return userList;
     }
 
     public void cleanUsersTable() {
-
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute("TRUNCATE TABLE USER ");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }
