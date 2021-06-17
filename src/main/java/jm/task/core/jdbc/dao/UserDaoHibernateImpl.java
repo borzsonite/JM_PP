@@ -2,13 +2,15 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
+
 
 public class UserDaoHibernateImpl implements UserDao {
 
@@ -57,18 +59,43 @@ public class UserDaoHibernateImpl implements UserDao {
                 transaction.rollback();
             }
         }
-
-
     }
 
     @Override
     public void removeUserById(long id) {
+        Transaction transaction = null;
 
+        try {
+            Session session = Util.getSessionFactory().openSession();
+            transaction = session.beginTransaction();
+            User userToDelete = (User) session.load(User.class, id);
+            session.delete(userToDelete);
+            transaction.commit();
+        } catch (Exception e) {
+            if(transaction != null) {
+                transaction.rollback();
+            }
+        }
     }
 
     @Override
     public List<User> getAllUsers() {
-        return null;
+        Transaction transaction = null;
+        List<User> users = new ArrayList<>();
+        try {
+            Session session = Util.getSessionFactory().openSession();
+           // List<User> users = session.createQuery("from User", User.class).list();
+            Criteria criteria = session.createCriteria(User.class);
+            users = criteria.list();
+           // users.stream().forEach(s-> System.out.println(s));
+            transaction.commit();
+        } catch (Exception e) {
+            if(transaction != null) {
+                transaction.rollback();
+            }
+        }
+
+        return users;
     }
 
     @Override

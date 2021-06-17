@@ -40,7 +40,7 @@ public class Util {
 
                 Properties settings = new Properties();
                 settings.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
-                settings.put(Environment.URL, "jdbc:mysql://localhost:3306/java_dmeo?useSSL=false");
+                settings.put(Environment.URL, "jdbc:mysql://localhost:3306/pp_db");
                 settings.put(Environment.USER, "bestuser");
                 settings.put(Environment.PASS, "bestuser");
                 settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
