@@ -11,7 +11,7 @@ public class Util {
     private static final String PASSWORD = "bestuser";
     private static Connection connection = null;
 
-    public static Connection getConnection() {
+    public static Connection getJdbcConnection() {
 
         try {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
