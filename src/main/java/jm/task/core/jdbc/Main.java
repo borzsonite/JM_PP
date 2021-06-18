@@ -19,10 +19,12 @@ public class Main {
         userDao.saveUser("Mike", "Petrov", (byte) 34);
         userDao.saveUser("Maria", "Ivanova", (byte) 30);
 
+        userDao.dropUsersTable();
+
 //        userDao.removeUserById(1);
 //        userDao.removeUserById(3);
-        System.out.println(userDao.getAllUsers());
-
+//        System.out.println(userDao.getAllUsers());
+        userDao.cleanUsersTable();
 //      3. Получение всех User из базы и вывод в консоль (должен быть переопределен toString в классе User)
 //        System.out.println(userDaoJDBC.getAllUsers());
 
