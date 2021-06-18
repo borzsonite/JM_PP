@@ -5,9 +5,6 @@ import jm.task.core.jdbc.util.Util;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,28 +16,35 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        try (Connection connection = Util.getJdbcConnection()) {
-            Statement statement = connection.createStatement();
-            String createTable = "CREATE TABLE IF NOT EXISTS users (\n" +
-                    "id BIGINT NOT NULL AUTO_INCREMENT,\n" +
-                    "name varchar(30),\n" +
-                    "last_name varchar(30),\n" +
-                    "age tinyint,\n" +
-                    "PRIMARY KEY (id));";
-            statement.execute(createTable);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        Transaction transaction = null;
+        String createTable = "CREATE TABLE IF NOT EXISTS users(id BIGINT NOT NULL AUTO_INCREMENT, name varchar(30), last_name varchar(30), age tinyint, PRIMARY KEY (id))";
+
+        try {
+            Session session = Util.getSessionFactory().openSession();
+            transaction = session.beginTransaction();
+            session.createSQLQuery(createTable).executeUpdate();
+            transaction.commit();
+        } catch(Exception e) {
+            if(transaction != null) {
+                transaction.rollback();
+            }
         }
     }
 
     @Override
     public void dropUsersTable() {
-        try (Connection connection = Util.getJdbcConnection()) {
-            Statement statement = connection.createStatement();
-            String dropTable = "DROP TABLE IF EXISTS users";
-            statement.execute(dropTable);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        Transaction transaction = null;
+        String dropTable = "DROP TABLE IF EXISTS users";
+
+        try {
+            Session session = Util.getSessionFactory().openSession();
+            transaction = session.beginTransaction();
+            session.createSQLQuery(dropTable).executeUpdate();
+            transaction.commit();
+        } catch(Exception e) {
+            if(transaction != null) {
+                transaction.rollback();
+            }
         }
     }
 
@@ -80,17 +84,14 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        Transaction transaction = null;
         List<User> users = new ArrayList<>();
-        try {
-            Session session = Util.getSessionFactory().openSession();
-            Criteria criteria = session.createCriteria(User.class);
-            users = criteria.list();
-            transaction.commit();
+
+        try (Session session = Util.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            users = session.createQuery("from User").list();
+            session.getTransaction().commit();
         } catch (Exception e) {
-            if(transaction != null) {
-                transaction.rollback();
-            }
+            e.printStackTrace();
         }
         return users;
     }
